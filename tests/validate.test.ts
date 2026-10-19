@@ -43,6 +43,10 @@ describe("server-side rules", () => {
       }),
     ).not.toContain("give_before_ask");
   });
+  it("stays in the sender's voice", () => {
+    expect(failedIds("Let me check with Ada and come back to you.")).toContain("own_voice");
+    expect(failedIds("Let me check and come back to you today.")).not.toContain("own_voice");
+  });
   it("caps length at 90 words", () => expect(failedIds(Array(95).fill("word").join(" "))).toContain("word_limit"));
 });
 
@@ -50,7 +54,7 @@ describe("scripted model's rewrites", () => {
   it("pass every rule even as a first reply", async () => {
     const { scriptedModel } = await import("@/lib/model/scripted");
     const opener = openerFor("Kemi");
-    for (const text of ["Hi", "How much is it?", "What is this about?", "We use spreadsheets"]) {
+    for (const text of ["Hi", "How much is it?", "What is this about?", "We use spreadsheets", "Is this about the tender?"]) {
       const { draft } = await scriptedModel.draft({
         contact: { name: "Kemi Adebayo", company: "Brightpath Studio" },
         opener,

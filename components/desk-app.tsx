@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { dollars, useDesk } from "@/lib/client";
-import type { UiStep } from "@/lib/state";
+import type { UiEvent, UiStep } from "@/lib/state";
 import { Lights, Stamp, TopBar } from "./ui";
 
 const SCENARIOS = [
@@ -23,6 +23,13 @@ export function DeskApp() {
   const [draft, setDraft] = useState("");
   const threadRef = useRef<HTMLDivElement>(null);
   const contact = state?.contacts.find((c) => c.id === state.selectedId);
+  // Messages and the events that aren't tied to one (forged deliveries, take-overs), newest first.
+  const timeline: ({ kind: "step"; at: string; step: UiStep } | { kind: "event"; at: string; event: UiEvent })[] = state
+    ? [
+        ...state.steps.map((step) => ({ kind: "step" as const, at: step.message.createdAt, step })),
+        ...state.looseEvents.map((event) => ({ kind: "event" as const, at: event.createdAt, event })),
+      ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    : [];
 
   useEffect(() => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
@@ -114,7 +121,11 @@ export function DeskApp() {
           </div>
 
           <div className="provider">
-            <p className="label">Provider tricks</p>
+            <p className="label">Things a real provider (or an attacker) does</p>
+            <ul className="explain">
+              <li><strong>Deliver again:</strong> providers sometimes send the same message twice. Watch it get ignored.</li>
+              <li><strong>Forged signature:</strong> a request pretending to be the provider. Watch it get refused at the door.</li>
+            </ul>
             <div className="provider-btns">
               <button className="btn btn-ghost btn-sm" onClick={desk.redeliver} disabled={busy}>
                 Deliver the last message again
@@ -143,28 +154,25 @@ export function DeskApp() {
             )}
           </div>
 
-          {state?.providerEvents.length ? (
-            <div className="provider-log">
-              <p className="label">Stopped at the door</p>
-              {state.providerEvents.slice(0, 2).map((e) => (
-                <p key={e.id} className={`event tone-${e.tone}`}>
-                  <span className="dot" />
-                  {e.summary}
-                </p>
-              ))}
-            </div>
-          ) : null}
-
-          {state && state.steps.length === 0 && (
+          {state && state.steps.length === 0 && timeline.length === 0 && (
             <div className="empty">
               <p>Nothing yet. Send a message from the phone, or tap one of the examples.</p>
             </div>
           )}
 
           <ol className="steps">
-            {state?.steps.map((s) => (
-              <Step key={s.message.id} step={s} />
-            ))}
+            {timeline.map((item) =>
+              item.kind === "step" ? (
+                <Step key={`m${item.step.message.id}`} step={item.step} />
+              ) : item.event.kind === "webhook.forged" ? (
+                <Forged key={`e${item.event.id}`} event={item.event} />
+              ) : (
+                <li key={`e${item.event.id}`} className="note-row">
+                  <span className="dot" aria-hidden="true" />
+                  {item.event.summary}
+                </li>
+              ),
+            )}
           </ol>
         </section>
       </main>
@@ -225,6 +233,28 @@ function Step({ step }: { step: UiStep }) {
           <span>{dollars(d.costMicros)}</span>
         </footer>
       )}
+    </li>
+  );
+}
+
+function Forged({ event }: { event: UiEvent }) {
+  const text = (event.detail as { text?: string } | null)?.text;
+  return (
+    <li className="step step-forged">
+      <header className="step-head">
+        <p className="quote">{text ? `“${text}”` : "A forged delivery"}</p>
+        <Stamp status="REFUSED" />
+      </header>
+      <div className="stations">
+        <Station tone="blocked" title="Webhook">
+          {event.summary}
+        </Station>
+      </div>
+      <p className="explainer">
+        Messaging providers like WhatsApp sign every delivery with a secret that only they and this server know. The server checks that
+        signature before it reads anything. This request was signed with the wrong secret, so it could have come from anyone. Nothing was
+        stored and nobody replied. Without this check, anyone who found the webhook address could inject fake messages and trigger replies.
+      </p>
     </li>
   );
 }

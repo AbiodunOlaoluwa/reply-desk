@@ -16,7 +16,7 @@ You play the prospect. Each message you send goes through the same path a real d
 | Forged requests are refused | HMAC-SHA256 over the raw body, constant-time compare, fails closed with no secret | `lib/signature.ts` |
 | "Stop" is honoured everywhere | Opt-out is saved before anything else runs, and every sender checks it, people included | `lib/pipeline.ts`, `lib/send.ts` |
 | "Can you stop by on Tuesday?" is not an opt-out | Word-boundary matching with explicit exclusions | `lib/optout.ts` |
-| The AI never says what it shouldn't | Structured draft, then 13 server-side rules; one rewrite, then a person | `lib/validate.ts` |
+| The AI never says what it shouldn't | Structured draft, then 14 server-side rules; one rewrite, then a person | `lib/validate.ts` |
 | Sensitive moments go to a person | Calls, meetings, contracts, complaints, low confidence, and "are you a bot?" (fixed disclosure text, then handover) | `lib/pipeline.ts` |
 | It knows when to say nothing | A "wait" stage when the prospect owes the next move | `lib/pipeline.ts` |
 | Everything that sends can be stopped | Kill switch, daily cap, dry-run mode | `lib/send.ts` |
@@ -31,6 +31,7 @@ Every rule in `lib/validate.ts` was added after a prompt-only version of it fail
 - **Doesn't recite the opener.** Answering "Hi" by repeating the introduction is the clearest sign nobody is reading.
 - **Gives something before asking again.** "Understood. How many invoices…?" right after they answered feels like an interrogation.
 - **No placeholders or test text.** A test once reached a real prospect as "Good afternoon, test." Since then, the server refuses it.
+- **Stays in the sender's voice.** The outreach comes from a named person, so a reply that says "I'll check with Ada" either talks about her as someone else or gives the game away. The name is refused; if someone asks whether they're talking to a bot, the server answers with fixed, honest text and hands over.
 - **At most one question.** Two questions in one message usually get neither answered.
 
 ## Run it
@@ -38,7 +39,7 @@ Every rule in `lib/validate.ts` was added after a prompt-only version of it fail
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm test           # 50 tests: rules, opt-out, signatures, and the pipeline end to end
+npm test           # 51 tests: rules, opt-out, signatures, and the pipeline end to end
 ```
 
 With no configuration, it runs on an in-process Postgres (PGlite, stored in `.data/`) and a **scripted model**. The scripted model makes some deliberate mistakes on first drafts (an invented price, a recited opener) so you can watch the rules catch them.

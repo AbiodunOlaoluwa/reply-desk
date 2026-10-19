@@ -41,7 +41,7 @@ export async function getState(db: Db, contactId?: string) {
       "select id, direction, actor, body, created_at from messages where contact_id = $1 order by id",
       [selected.id],
     )
-  ).map((m) => ({ id: Number(m.id), direction: m.direction, actor: m.actor, body: m.body, createdAt: String(m.created_at) }));
+  ).map((m) => ({ id: Number(m.id), direction: m.direction, actor: m.actor, body: m.body, createdAt: iso(m.created_at) }));
 
   const events = await db.query<{ id: number; message_id: number | null; decision_id: number | null; kind: string; tone: string; summary: string; detail: unknown; created_at: string }>(
     "select * from events where contact_id = $1 order by id",
@@ -61,9 +61,6 @@ export async function getState(db: Db, contactId?: string) {
     .reverse();
 
   const looseEvents = events.filter((e) => e.message_id === null && e.decision_id === null).map(toUiEvent).reverse();
-  const providerEvents = (await db.query<Record<string, unknown>>("select * from events where contact_id is null order by id desc limit 5")).map((e) =>
-    toUiEvent(e as never),
-  );
 
   const held = (
     await db.query<Record<string, unknown>>(
@@ -94,7 +91,6 @@ export async function getState(db: Db, contactId?: string) {
     messages,
     steps,
     looseEvents,
-    providerEvents,
     held,
     settings: await getSettings(db),
     stats: {
@@ -108,7 +104,7 @@ export async function getState(db: Db, contactId?: string) {
 }
 
 function toUiEvent(e: { id: number; kind: string; tone: string; summary: string; detail: unknown; created_at: string }): UiEvent {
-  return { id: Number(e.id), kind: e.kind, tone: e.tone, summary: e.summary, detail: e.detail, createdAt: String(e.created_at) };
+  return { id: Number(e.id), kind: e.kind, tone: e.tone, summary: e.summary, detail: e.detail, createdAt: iso(e.created_at) };
 }
 
 function toUiDecision(d: Record<string, unknown>): UiDecision {
@@ -130,6 +126,11 @@ function toUiDecision(d: Record<string, unknown>): UiDecision {
     costMicros: Number(d.cost_micros ?? 0),
     edited: Boolean(d.edited),
   };
+}
+
+// Millisecond ISO timestamps, so messages and events that land in the same second still sort correctly.
+function iso(v: unknown) {
+  return new Date(v as string).toISOString();
 }
 
 export type DeskState = Awaited<ReturnType<typeof getState>>;

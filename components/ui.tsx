@@ -87,6 +87,7 @@ const STAMP: Record<string, { tone: string; label: string }> = {
   DRY_RUN: { tone: "wait", label: "Dry run" },
   DISCARDED: { tone: "muted", label: "Discarded" },
   PENDING: { tone: "muted", label: "Deciding…" },
+  REFUSED: { tone: "blocked", label: "Refused" },
 };
 
 export function Stamp({ status }: { status: string }) {

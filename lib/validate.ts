@@ -3,6 +3,10 @@
 // prompt-only version of it was ignored at least once in production.
 import { allowedAmounts, allowedLinks, business } from "./facts";
 
+// The conversation is in the sender's own voice (the opener says "I'm Ada"), so naming her is either
+// talking about her as someone else or claiming to be her. Both are refused.
+const OPERATOR_NAME = new RegExp(`\\b(${business.operator}|${business.operatorFull})\\b`, "i");
+
 export type Check = { id: string; label: string; ok: boolean; detail?: string };
 
 export type ValidationContext = {
@@ -64,6 +68,7 @@ export function validateReply(ctx: ValidationContext): Check[] {
   add("no_placeholders", "No placeholders or test text", !PLACEHOLDER.test(r), "Contains placeholder or test text.");
   add("no_self_claims", "Never claims to be human", !SELF_CLAIM.test(r), "Makes a claim about being human or AI.");
   add("no_promises", "No promises or discounts", !PROMISE.test(r), "Promises something that is not in the facts.");
+  add("own_voice", "Stays in the sender's voice", !OPERATOR_NAME.test(r), `Mentions ${business.operator} by name, but the conversation is in ${business.operator}'s own voice.`);
 
   if (ctx.isFirstReply) {
     add("first_reply_link", "First reply carries the link", r.includes(business.link), "The first reply must include the website link.");

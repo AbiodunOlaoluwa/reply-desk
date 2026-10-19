@@ -120,7 +120,7 @@ export const scriptedModel: ReplyModel = {
         draft = d(
           "answer",
           0.45,
-          `Thanks for asking. I'm not certain I follow, so I'll check with ${business.operator} and come back to you. In the meantime, this is what we do: ${business.link}`,
+          `Thanks for asking. I'm not sure I follow, so let me check and come back to you today. In the meantime, this is what we do: ${business.link}`,
           "Not sure what they mean, so a person should check this one.",
         );
     }
