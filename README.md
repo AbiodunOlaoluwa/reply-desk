@@ -1,5 +1,7 @@
 # Reply Desk
 
+[![test](https://github.com/AbiodunOlaoluwa/reply-desk/actions/workflows/test.yml/badge.svg)](https://github.com/AbiodunOlaoluwa/reply-desk/actions/workflows/test.yml)
+
 AI replies to inbound sales messages, inside server-side rules the model cannot override.
 
 Reply Desk is a working demo of the system that answers WhatsApp replies to outreach for [Rentyx](https://rentyx.org). It is rebuilt here on a fictional company (Tallyhouse) and fictional prospects, so anyone can run it and nothing touches real people's data.
