@@ -2,7 +2,7 @@
   "name": "reply-desk",
   "version": "0.1.0",
   "private": true,
-  "description": "AI replies to inbound sales messages, inside server-side rules the model cannot override. A Rexara Digital demo on fictional data.",
+  "description": "AI replies to inbound sales messages, inside server-side rules the model cannot override. Runs on fictional data.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

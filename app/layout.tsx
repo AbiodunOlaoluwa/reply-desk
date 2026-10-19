@@ -7,7 +7,7 @@ const body = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"]
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Reply Desk · a Rexara Digital demo",
+  title: "Reply Desk",
   description: "AI replies to inbound sales messages, inside server-side rules the model cannot override. Every name is fictional.",
 };
 
