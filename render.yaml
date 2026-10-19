@@ -1,0 +1,14 @@
+# Render blueprint: one free web service. Without DATABASE_URL it uses PGlite (in-process Postgres) on the
+# instance's disk and seeds the fictional demo on first start, so a restart resets the demo. The scripted model
+# needs no API key (set REPLY_DESK_MODE=anthropic and ANTHROPIC_API_KEY for Claude).
+services:
+  - type: web
+    name: reply-desk
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
