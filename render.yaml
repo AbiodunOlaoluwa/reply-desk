@@ -1,6 +1,14 @@
-# Render blueprint: one free web service. Without DATABASE_URL it uses PGlite (in-process Postgres) on the
-# instance's disk and seeds the fictional demo on first start, so a restart resets the demo. The scripted model
-# needs no API key (set REPLY_DESK_MODE=anthropic and ANTHROPIC_API_KEY for Claude).
+# Render blueprint: a free web service and a free Postgres database, wired together.
+# PGlite (the in-process Postgres used locally and in tests) needs over 1 GB of memory, more than the free
+# instance's 512 MB, so the hosted demo uses a real Postgres through DATABASE_URL. The schema is created and the
+# fictional demo seeded on first start; "Reset demo" in the app reseeds it. The scripted model needs no API key
+# (set REPLY_DESK_MODE=anthropic and ANTHROPIC_API_KEY for Claude).
+databases:
+  - name: reply-desk-db
+    plan: free
+    databaseName: replydesk
+    user: replydesk
+
 services:
   - type: web
     name: reply-desk
@@ -12,3 +20,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: reply-desk-db
+          property: connectionString
