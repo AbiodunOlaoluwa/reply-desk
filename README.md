@@ -66,4 +66,4 @@ PGlite writes to local disk, so serverless hosts need `DATABASE_URL` (Neon's fre
 
 ## Built by
 
-[Rexara Digital](https://rexara.digital), a small automation studio in Lagos. All names, numbers and the company in this demo are fictional.
+[Olaoluwa Abiodun](https://github.com/AbiodunOlaoluwa), Lagos. All names, numbers and the company in this demo are fictional.
